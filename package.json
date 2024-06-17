@@ -41,6 +41,8 @@
     "@types/d3": "^7.4.3",
     "@types/jsdom": "^21.1.7",
     "cross-env": "^7.0.3",
+    "d3": "^7.9.0",
+    "jsdom": "^24.1.0",
     "rimraf": "^5.0.7",
     "type-fest": "^4.20.0",
     "typescript": "^5.4.5",
@@ -48,9 +50,11 @@
   },
   "dependencies": {
     "common-tags": "^1.8.2",
-    "d3": "^7.9.0",
     "dset": "^3.1.3",
-    "jsdom": "^24.1.0",
     "remeda": "^2.0.9"
+  },
+  "peerDependencies": {
+    "d3": "^7.9.0",
+    "jsdom": "^24.1.0"
   }
 }
