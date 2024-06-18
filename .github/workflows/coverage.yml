@@ -1,5 +1,5 @@
-name: 'Test'
-on: 
+name: 'Test & Coverage'
+on:
   pull_request:
 
 jobs:
@@ -12,14 +12,39 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    
+    - name: 'Install pnpm'
+      uses: pnpm/action-setup@v2
+      with:
+        version: 7
+        run_install: false
+        
     - name: 'Install Node'
       uses: actions/setup-node@v4
       with:
         node-version: '20.x'
+        
+    - name: 'Get pnpm store directory'
+      id: pnpm-cache
+      shell: bash
+      run: |
+        echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+        
+    - uses: actions/cache@v3
+      name: Setup pnpm cache
+      with:
+        path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+          
     - name: 'Install Dependencies'
-      run: npm install
+      run: pnpm install
+      
     - name: 'Test'
-      run: npx vitest --coverage.enabled true
+      run: pnpm vitest --coverage.enabled true
+      
     - name: 'Report Coverage'
-      if: always() 
-      uses:  davelosert/vitest-coverage-report-action@v2
+      if: always()
+      uses: davelosert/vitest-coverage-report-action@v2
+
