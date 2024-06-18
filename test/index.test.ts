@@ -5,18 +5,20 @@ import { JSDOM } from "jsdom";
 import * as d3 from "d3";
 
 describe("prepareSvgServerSideRenderer", () => {
-  it("should render SVG with default options", async () => {
+  it("should create SVG with default options", async () => {
     const { render } = prepareGenericRenderer();
-    const result = await render(async () => {});
+
+    const result = await render(() => {});
 
     expect(result).toContain("<svg");
     expect(result).toContain('width="100"');
     expect(result).toContain('height="100"');
   });
 
-  it("should render SVG with custom options", async () => {
+  it("should create SVG with custom options", async () => {
     const { render } = prepareGenericRenderer();
-    const result = await render(async () => {}, {
+
+    const result = await render(() => {}, {
       svg: {
         width: 200,
         height: 300
@@ -28,9 +30,25 @@ describe("prepareSvgServerSideRenderer", () => {
     expect(result).toContain('height="300"');
   });
 
-  it("should render SVG with custom rendering function", async () => {
+  it("should create SVG with asynchronous operation in render function", async () => {
     const { render } = prepareGenericRenderer();
+    const dummyAsynchronousOperation = async () => {
+      return "asynchronous result";
+    };
+
     const result = await render(async ({ d3Selection }) => {
+      const asyncOperationResult = await dummyAsynchronousOperation();
+      d3Selection.html(asyncOperationResult);
+    });
+
+    expect(result).toContain("<svg");
+    expect(result).toContain("asynchronous result");
+  });
+
+  it("should create SVG with custom rendering function", async () => {
+    const { render } = prepareGenericRenderer();
+
+    const result = await render(({ d3Selection }) => {
       d3Selection
         .append("circle")
         .attr("cx", 50)
@@ -42,9 +60,10 @@ describe("prepareSvgServerSideRenderer", () => {
     expect(result).toContain('<circle cx="50" cy="50" r="40">');
   });
 
-  it("should render SVG safely by setting sanitized using innerHTML directly", async () => {
+  it("should create SVG safely by setting sanitized using innerHTML directly", async () => {
     const { render } = prepareGenericRenderer();
-    const result = await render(async ({ svgNode }) => {
+
+    const result = await render(({ svgNode }) => {
       svgNode.innerHTML = '<script>alert("xss")</script>';
     });
 
@@ -52,11 +71,11 @@ describe("prepareSvgServerSideRenderer", () => {
     expect(result).not.toContain("<script>");
   });
 
-  it("should render SVG unsafely by setting sanitized using innerHTML directly", async () => {
+  it("should create SVG unsafely by setting sanitized using innerHTML directly", async () => {
     const { render } = prepareGenericRenderer();
 
     const result = await render(
-      async ({ svgNode }) => {
+      ({ svgNode }) => {
         svgNode.innerHTML = '<script>alert("xss")</script>';
       },
       {
@@ -68,10 +87,11 @@ describe("prepareSvgServerSideRenderer", () => {
     expect(result).toContain("<script>");
   });
 
-  it("should render SVG as base64 when options.asBase64 is true", async () => {
+  it("should create SVG as base64 when options.asBase64 is true", async () => {
     const { render } = prepareGenericRenderer();
+
     const result = await render(
-      async ({ d3Selection }) => {
+      ({ d3Selection }) => {
         d3Selection
           .append("circle")
           .attr("cx", 50)
@@ -91,6 +111,7 @@ describe("toSvgBase64", () => {
   it("should convert SVG string to base64", () => {
     const svgString =
       '<svg><rect x="10" y="10" width="100" height="100" /></svg>';
+
     const base64 = toSvgBase64(svgString);
 
     expect(base64).toContain(
