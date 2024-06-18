@@ -1,4 +1,4 @@
-import type { PartialDeep, RequiredDeep } from "type-fest";
+import type { PartialDeep, Promisable, RequiredDeep } from "type-fest";
 import type {  ConstructorOptions as JsDomOptions } from "jsdom";
 import { safeHtml } from "common-tags";
 import { dset as deepSet } from "dset";
@@ -21,7 +21,7 @@ type PrepareSvgServerSideRender = ({
   currentDom: import("jsdom").JSDOM;
   d3Selection: import("d3").Selection<SVGSVGElement, unknown, null, undefined>;
   svgNode: SVGSVGElement;
-}) => Promise<void> | Promise<string>;
+}) => Promisable<void> | Promisable<string>;
 
 type PrepareSvgServerSideRenderOptions = PartialDeep<{
   svg: {
