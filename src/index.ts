@@ -83,7 +83,7 @@ export function prepareSvgServerSideRenderer({
 
   const render = async (
     fn: PrepareSvgServerSideRender,
-    options: PrepareSvgServerSideRenderOptions,
+    options: PrepareSvgServerSideRenderOptions = {},
   ) => {
     const renderOptions = mergeDeep(
       DEFAULT_RENDER_OPTIONS,
@@ -103,7 +103,7 @@ export function prepareSvgServerSideRenderer({
       d3Selection: d3SelectedSvg,
     });
 
-    d3SelectedSvg.html(null).attr("width", null).attr("height", null);
+    // d3SelectedSvg.html(null).attr("width", null).attr("height", null);
 
     if (renderOptions.asBase64) {
       if (isString(result)) return toSvgBase64(result);
