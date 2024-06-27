@@ -1,4 +1,4 @@
-name: 'Test & Coverage'
+name: "Test & Coverage"
 on:
   pull_request:
 
@@ -8,32 +8,46 @@ jobs:
     strategy:
       matrix:
         node-version: [20]
-    
+
     permissions:
       contents: read
       pull-requests: write
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Install pnpm
-      uses: pnpm/action-setup@v4
-      with:
-        version: 9
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: 9
+          run_install: false
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'pnpm'
+      - name: Install Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "pnpm"
 
-    - name: Install dependencies
-      run: pnpm install
-      
-    - name: 'Test'
-      run: pnpm vitest --coverage.enabled true
-      
-    - name: 'Report Coverage'
-      if: always()
-      uses: davelosert/vitest-coverage-report-action@v2
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
+      - uses: actions/cache@v4
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: "Test"
+        run: pnpm vitest --coverage.enabled true
+
+      - name: "Report Coverage"
+        if: always()
+        uses: davelosert/vitest-coverage-report-action@v2
