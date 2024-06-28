@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.ACTIONS_BRANCH_PROTECTION_BYPASS }}
 
       - uses: pnpm/action-setup@v4
         name: Install pnpm
