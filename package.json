@@ -7,6 +7,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
+    "release": "semantic-release",
     "prepublish": "cross-env FORCE_COLOR=1 pnpm run clean && pnpm run build",
     "clean": "rimraf ./dist/",
     "build": "cross-env FORCE_COLOR=1 tsc",
@@ -36,6 +37,12 @@
   "license": "MIT",
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.15.3",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.0",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^10.0.6",
+    "@semantic-release/npm": "^12.0.1",
+    "@semantic-release/release-notes-generator": "^14.0.1",
     "@total-typescript/tsconfig": "^1.0.4",
     "@types/common-tags": "^1.8.4",
     "@types/d3": "^7.4.3",
@@ -45,6 +52,7 @@
     "d3": "^7.9.0",
     "jsdom": "^24.1.0",
     "rimraf": "^5.0.7",
+    "semantic-release": "^24.0.0",
     "type-fest": "^4.20.0",
     "typescript": "^5.4.5",
     "vitest": "^1.6.0"
