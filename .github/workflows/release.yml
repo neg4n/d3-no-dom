@@ -1,17 +1,20 @@
-name: "Test & Coverage"
+name: "Release"
 on:
-  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
 
 jobs:
-  test:
+  release:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [20]
-
     permissions:
-      contents: read
+      contents: write 
+      issues: write
       pull-requests: write
+      id-token: write
 
     steps:
       - name: Checkout
@@ -23,10 +26,10 @@ jobs:
           version: 9
           run_install: false
 
-      - name: Install Node.js ${{ matrix.node-version }}
+      - name: Install Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 20
           cache: "pnpm"
 
       - name: Get pnpm store directory
@@ -45,9 +48,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: "Test"
-        run: pnpm vitest --coverage.enabled true
+      - name: Prepare project to publish
+        run: pnpm prepublish
 
-      - name: "Report Coverage"
-        if: always()
-        uses: davelosert/vitest-coverage-report-action@v2
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm release
