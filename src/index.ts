@@ -4,7 +4,6 @@ import { safeHtml } from "common-tags";
 import { dset as deepSet } from "dset";
 import { isString, mergeDeep } from "remeda";
 
-
 type PrepareSvgServerSideRendererParams = {
   jsdomInstance: typeof import("jsdom").JSDOM;
   d3Instance:  typeof import("d3");
