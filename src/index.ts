@@ -1,23 +1,30 @@
 import type { PartialDeep, Promisable, RequiredDeep } from "type-fest";
-import type {  ConstructorOptions as JsDomOptions } from "jsdom";
 import { safeHtml } from "common-tags";
 import { dset as deepSet } from "dset";
 import { isString, mergeDeep } from "remeda";
 
-type PrepareSvgServerSideRendererParams = {
-  jsdomInstance: typeof import("jsdom").JSDOM;
-  d3Instance:  typeof import("d3");
-  options?: {
-    dom?: JsDomOptions;
+type DomProvider<T> = new (html: string) => T;
+type InferDomType<T> = T extends DomProvider<infer U> ? U : never;
+
+type DomWithBody = {
+  window: {
+    document: {
+      body: Element;
+    };
   };
 };
 
-type PrepareSvgServerSideRender = ({
+type PrepareSvgServerSideRendererParams<T extends DomProvider<DomWithBody>> = {
+  domProvider: T;
+  d3Instance: typeof import("d3");
+};
+
+type PrepareSvgServerSideRender<T extends DomWithBody> = ({
   currentDom,
   d3Selection,
   svgNode,
 }: {
-  currentDom: import("jsdom").JSDOM;
+  currentDom: T;
   d3Selection: import("d3").Selection<SVGSVGElement, unknown, null, undefined>;
   svgNode: SVGSVGElement;
 }) => Promisable<void> | Promisable<string>;
@@ -31,32 +38,22 @@ type PrepareSvgServerSideRenderOptions = PartialDeep<{
   asBase64: boolean;
 }>;
 
-const DEFAULT_OPTIONS: Pick<PrepareSvgServerSideRendererParams, "options"> = {
-  options: {
-    dom: {
-      pretendToBeVisual: true,
-    },
+const DEFAULT_RENDER_OPTIONS: RequiredDeep<PrepareSvgServerSideRenderOptions> = {
+  svg: {
+    width: 100,
+    height: 100,
   },
+  safe: true,
+  asBase64: false,
 };
 
-const DEFAULT_RENDER_OPTIONS: RequiredDeep<PrepareSvgServerSideRenderOptions> =
-  {
-    svg: {
-      width: 100,
-      height: 100,
-    },
-    safe: true,
-    asBase64: false,
-  };
-
-export function prepareSvgServerSideRenderer({
-  options: incomingRendererOptions = {},
+export function prepareSvgServerSideRenderer<T extends DomProvider<DomWithBody>>({
   d3Instance,
-  jsdomInstance,
-}: PrepareSvgServerSideRendererParams) {
-  const rendererOptions = mergeDeep(DEFAULT_OPTIONS, incomingRendererOptions);
+  domProvider,
+}: PrepareSvgServerSideRendererParams<T>) {
+  type DomType = InferDomType<T>;
 
-  const dom = new jsdomInstance("<body></body>", rendererOptions.dom);
+  const dom = new domProvider("<body></body>") as DomType;
   const body = d3Instance.select(dom.window.document.body);
 
   const createPaintingArea = () =>
@@ -81,7 +78,7 @@ export function prepareSvgServerSideRenderer({
   });
 
   const render = async (
-    fn: PrepareSvgServerSideRender,
+    fn: PrepareSvgServerSideRender<DomType>,
     options: PrepareSvgServerSideRenderOptions = {},
   ) => {
     const renderOptions = mergeDeep(
@@ -119,3 +116,4 @@ export function toSvgBase64(string: string) {
   const base64String = btoa(encodeURIComponent(string));
   return `data:image/svg+xml;base64,${base64String}`;
 }
+
