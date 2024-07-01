@@ -29,10 +29,15 @@ type PrepareSvgServerSideRender<T extends DomWithBody> = ({
   svgNode: SVGSVGElement;
 }) => Promisable<void> | Promisable<string>;
 
+type NumericString = `${number}` | `${number}e${number}` | `${number}E${number}`;
+
+type SvgViewbox = `${NumericString},${NumericString},${NumericString},${NumericString}` | `${NumericString} ${NumericString} ${NumericString} ${NumericString}`;
+
 type PrepareSvgServerSideRenderOptions = PartialDeep<{
   svg: {
     width: number;
     height: number;
+    viewBox: SvgViewbox;
   };
   safe: boolean;
   asBase64: boolean;
@@ -42,6 +47,7 @@ const DEFAULT_RENDER_OPTIONS: RequiredDeep<PrepareSvgServerSideRenderOptions> = 
   svg: {
     width: 100,
     height: 100,
+    viewBox: "0 0 100 100",
   },
   safe: true,
   asBase64: false,
@@ -91,7 +97,8 @@ export function prepareSvgServerSideRenderer<T extends DomProvider<DomWithBody>>
 
     d3SelectedSvg
       .attr("width", renderOptions.svg.width)
-      .attr("height", renderOptions.svg.height);
+      .attr("height", renderOptions.svg.height)
+      .attr("viewBox", renderOptions.svg.viewBox)
 
     const result = await fn({
       currentDom: dom,
