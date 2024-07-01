@@ -162,7 +162,7 @@ describe("toSvgBase64", () => {
     const base64 = toSvgBase64(svgString);
 
     expect(base64).toContain(
-      "data:image/svg+xml;base64,JTNDc3ZnJTNFJTNDcmVjdCUyMHglM0QlMjIxMCUyMiUyMHklM0QlMjIxMCUyMiUyMHdpZHRoJTNEJTIyMTAwJTIyJTIwaGVpZ2h0JTNEJTIyMTAwJTIyJTIwJTJGJTNFJTNDJTJGc3ZnJTNF"
+      "PHN2Zz48cmVjdCB4PSIxMCIgeT0iMTAiIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiAvPjwvc3ZnPg=="
     );
   });
 });
