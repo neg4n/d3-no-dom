@@ -17,7 +17,7 @@ describe("prepareSvgServerSideRenderer", () => {
     expect(result).toContain('height="100"');
   });
 
-  it("should create SVG with custom options", async () => {
+  it("should create SVG with custom dimensions options", async () => {
     const { render } = prepareGenericRenderer();
 
     const result = await render(() => { }, {
@@ -30,6 +30,20 @@ describe("prepareSvgServerSideRenderer", () => {
     expect(result).toContain("<svg");
     expect(result).toContain('width="200"');
     expect(result).toContain('height="300"');
+  });
+
+
+  it("should create SVG with custom viewbox options", async () => {
+    const { render } = prepareGenericRenderer();
+
+    const result = await render(() => { }, {
+      svg: {
+        viewBox: "0 0 34 34"
+      }
+    });
+
+    expect(result).toContain("<svg");
+    expect(result).toContain('viewBox="0 0 34 34"');
   });
 
   it("should create SVG with asynchronous operation in render function", async () => {
