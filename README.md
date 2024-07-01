@@ -21,7 +21,7 @@ pnpm add d3-no-dom d3
 
 The `d3-no-dom` library does not provide any underlying DOM implementation, giving users the flexibility to choose their preferred DOM library. Some options are:
 
--  **[linkedom][linkedom]**: A lightweight and fast DOM implementation ideal for serverless environments such as [Cloudflare Workers][cfworkers] or [Vercel Functions][vercel-functions] (recommended).
+-  [`linkedom`][linkedom]: A lightweight and fast DOM implementation ideal for serverless environments such as [Cloudflare Workers][cfworkers] or [Vercel Functions][vercel-functions] (recommended).
   ```sh
   npm i linkedom 
   # or
@@ -30,7 +30,7 @@ The `d3-no-dom` library does not provide any underlying DOM implementation, givi
   pnpm add linkedom 
   ```
   
--  **[jsdom][jsdom]**: A more comprehensive and heavier DOM implementation, suitable for traditional backend environments like monolithic applications hosted on dedicated servers.
+-  [`jsdom`][jsdom]: A more comprehensive and heavier DOM implementation, suitable for traditional backend environments like monolithic applications hosted on dedicated servers.
   ```sh
   npm i jsdom 
   # or
@@ -40,7 +40,8 @@ The `d3-no-dom` library does not provide any underlying DOM implementation, givi
   ```
 
 > [!WARNING]  
-> **[jsdom][jsdom]** may not work on the [Cloudflare Workers][cfworkers] without specifying `nodejs_compat` flag due to use of the Node native modules
+> [`jsdom`][jsdom] may not work on the [Cloudflare Workers][cfworkers]
+> without specifying `nodejs_compat` flag due to use of the Node native modules
 
 
 ## How to use
