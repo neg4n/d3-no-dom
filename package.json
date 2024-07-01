@@ -51,6 +51,7 @@
     "cross-env": "^7.0.3",
     "d3": "^7.9.0",
     "jsdom": "^24.1.0",
+    "linkedom": "^0.18.4",
     "rimraf": "^5.0.7",
     "semantic-release": "^24.0.0",
     "type-fest": "^4.20.0",
@@ -63,7 +64,6 @@
     "remeda": "^2.0.9"
   },
   "peerDependencies": {
-    "d3": "^7.9.0",
-    "jsdom": "^24.1.0"
+    "d3": "^7.9.0"
   }
 }
