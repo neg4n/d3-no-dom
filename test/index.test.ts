@@ -2,13 +2,15 @@ import { describe, it, expect } from "vitest";
 import { prepareSvgServerSideRenderer, toSvgBase64 } from "../src/index.js";
 
 import { JSDOM } from "jsdom";
+import { parseHTML } from "linkedom";
+
 import * as d3 from "d3";
 
 describe("prepareSvgServerSideRenderer", () => {
   it("should create SVG with default options", async () => {
     const { render } = prepareGenericRenderer();
 
-    const result = await render(() => {});
+    const result = await render(() => { });
 
     expect(result).toContain("<svg");
     expect(result).toContain('width="100"');
@@ -18,7 +20,7 @@ describe("prepareSvgServerSideRenderer", () => {
   it("should create SVG with custom options", async () => {
     const { render } = prepareGenericRenderer();
 
-    const result = await render(() => {}, {
+    const result = await render(() => { }, {
       svg: {
         width: 200,
         height: 300
@@ -105,6 +107,37 @@ describe("prepareSvgServerSideRenderer", () => {
 
     expect(result).toContain("data:image/svg+xml;base64,");
   });
+
+  it("should create SVG with custom rendering function and alternative DOM provider", async () => {
+    class Linkedom {
+      window: { document: Document };
+      constructor(html: string) {
+        const { document, window } = parseHTML(html);
+        this.window = { document };
+        Object.assign(this.window, window);
+      }
+    }
+
+    const { render } = prepareSvgServerSideRenderer({
+      domProvider: Linkedom,
+      d3Instance: d3
+    });
+
+    const result = await render(({ d3Selection }) => {
+      d3Selection
+        .append("circle")
+        .attr("cx", 50)
+        .attr("cy", 50)
+        .attr("r", 40);
+    });
+
+    expect(result).toContain("<svg");
+    expect(result).toContain("<circle")
+    expect(result).toContain('r="40"');
+    expect(result).toContain('cx="50"');
+    expect(result).toContain('cy="50"');
+  });
+
 });
 
 describe("toSvgBase64", () => {
@@ -122,7 +155,7 @@ describe("toSvgBase64", () => {
 
 function prepareGenericRenderer() {
   return prepareSvgServerSideRenderer({
-    jsdomInstance: JSDOM,
+    domProvider: JSDOM,
     d3Instance: d3
   });
 }
