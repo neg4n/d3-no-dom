@@ -1,3 +1,28 @@
+# [2.0.0](https://github.com/neg4n/d3-no-dom/compare/v1.0.0...v2.0.0) (2024-07-01)
+
+
+* feat!: decouple jsdom from the internal mechanisms ([f0d1029](https://github.com/neg4n/d3-no-dom/commit/f0d1029c4c5a109350e45acde3f0ccc496435473))
+
+
+### Bug Fixes
+
+* remove encodeURIComponent in converting to b64 ([297275d](https://github.com/neg4n/d3-no-dom/commit/297275d0b17017f5f7333f2ad328470b86713585))
+
+
+### Features
+
+* add ability to modify svg's viewbox ([38b633a](https://github.com/neg4n/d3-no-dom/commit/38b633acf3bbaf64fddd1ed62ff78b446a2541e4))
+
+
+### BREAKING CHANGES
+
+* From now on, the d3-no-dom does
+not depend on any DOM-filling library undernath
+and it is up to end user to provide such
+functionality via the prepareServerSideSvgRenderer
+options (`domProvider`), just like it was done
+before with d3 (`d3Instance`)
+
 # 1.0.0 (2024-06-28)
 
 
