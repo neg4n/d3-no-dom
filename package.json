@@ -25,6 +25,9 @@
     "server-side-rendering",
     "typescript",
     "svg",
+    "cloudflare-workers",
+    "vercel-functions",
+    "linkedom",
     "svg-to-png",
     "jsdom",
     "dom"
@@ -60,7 +63,6 @@
   },
   "dependencies": {
     "common-tags": "^1.8.2",
-    "dset": "^3.1.3",
     "remeda": "^2.0.9"
   },
   "peerDependencies": {
