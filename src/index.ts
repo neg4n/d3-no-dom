@@ -1,7 +1,6 @@
 import type { PartialDeep, Promisable, RequiredDeep } from "type-fest";
 import { safeHtml } from "common-tags";
-import { dset as deepSet } from "dset";
-import { clone, isString, mergeDeep } from "remeda";
+import { clone, isString, mergeDeep, set } from "remeda";
 import type { BaseType as D3BaseType } from "d3";
 
 type DomProvider<T> = new (html: string) => T;
@@ -80,15 +79,16 @@ export function prepareSvgServerSideRenderer<T extends DomProvider<DomWithBody>>
     const svgToOperate = renderOptions.safe ? new Proxy(svgNode, {
       set(target, property, value) {
         const allowedProps = ["innerHTML", "outerHTML"];
+        const propertyKey = property as keyof SVGSVGElement
         if (
           allowedProps.includes(property.toString()) &&
           typeof value === "string"
         ) {
-          deepSet(target, property.toString(), safeHtml`${value}`);
+          set(target, propertyKey, safeHtml`${value}`);
           return true;
         }
 
-        deepSet(target, property.toString(), value);
+        set(target, propertyKey, value);
         return true;
       },
     }) : svgNode
