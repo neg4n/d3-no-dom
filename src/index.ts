@@ -1,17 +1,14 @@
 import type { PartialDeep, Promisable, RequiredDeep } from "type-fest";
 import { safeHtml } from "common-tags";
 import { dset as deepSet } from "dset";
-import { isString, mergeDeep } from "remeda";
+import { clone, isString, mergeDeep } from "remeda";
+import type { BaseType as D3BaseType } from "d3";
 
 type DomProvider<T> = new (html: string) => T;
 type InferDomType<T> = T extends DomProvider<infer U> ? U : never;
 
 type DomWithBody = {
-  window: {
-    document: {
-      body: Element;
-    };
-  };
+  window: Window
 };
 
 type PrepareSvgServerSideRendererParams<T extends DomProvider<DomWithBody>> = {
@@ -19,13 +16,15 @@ type PrepareSvgServerSideRendererParams<T extends DomProvider<DomWithBody>> = {
   d3Instance: typeof import("d3");
 };
 
+type D3Selection<T extends D3BaseType> = import("d3").Selection<T, unknown, null, undefined>;
+
 type PrepareSvgServerSideRender<T extends DomWithBody> = ({
   currentDom,
   d3Selection,
   svgNode,
 }: {
   currentDom: T;
-  d3Selection: import("d3").Selection<SVGSVGElement, unknown, null, undefined>;
+  d3Selection: D3Selection<SVGSVGElement>
   svgNode: SVGSVGElement;
 }) => Promisable<void> | Promisable<string>;
 
@@ -62,27 +61,6 @@ export function prepareSvgServerSideRenderer<T extends DomProvider<DomWithBody>>
   const dom = new domProvider("<body></body>") as DomType;
   const body = d3Instance.select(dom.window.document.body);
 
-  const createPaintingArea = () =>
-    body.append("svg").attr("id", "painting-area").node()!;
-
-  const svgElement = createPaintingArea();
-
-  const safeSvgElement = new Proxy(svgElement, {
-    set(target, property, value) {
-      const allowedProps = ["innerHTML", "outerHTML"];
-      if (
-        allowedProps.includes(property.toString()) &&
-        typeof value === "string"
-      ) {
-        deepSet(target, property.toString(), safeHtml`${value}`);
-        return true;
-      }
-
-      deepSet(target, property.toString(), value);
-      return true;
-    },
-  });
-
   const render = async (
     fn: PrepareSvgServerSideRender<DomType>,
     options: PrepareSvgServerSideRenderOptions = {},
@@ -91,27 +69,39 @@ export function prepareSvgServerSideRenderer<T extends DomProvider<DomWithBody>>
       DEFAULT_RENDER_OPTIONS,
       options,
     ) as RequiredDeep<PrepareSvgServerSideRenderOptions>;
+    const svgNode = dom.window.document.createElementNS("http://www.w3.org/2000/svg", "svg")
 
-    const svg = renderOptions.safe ? safeSvgElement : svgElement;
-    const d3SelectedSvg = d3Instance.select(svg);
+    dom.window.document.body.appendChild(svgNode)
 
-    d3SelectedSvg
-      .attr("width", renderOptions.svg.width)
-      .attr("height", renderOptions.svg.height)
-      .attr("viewBox", renderOptions.svg.viewBox)
+    svgNode.setAttribute("width", `${renderOptions.svg.width}`);
+    svgNode.setAttribute("height", `${renderOptions.svg.height}`);
+    svgNode.setAttribute("viewBox", `${renderOptions.svg.viewBox}`);
+
+    const svgToOperate = renderOptions.safe ? new Proxy(svgNode, {
+      set(target, property, value) {
+        const allowedProps = ["innerHTML", "outerHTML"];
+        if (
+          allowedProps.includes(property.toString()) &&
+          typeof value === "string"
+        ) {
+          deepSet(target, property.toString(), safeHtml`${value}`);
+          return true;
+        }
+
+        deepSet(target, property.toString(), value);
+        return true;
+      },
+    }) : svgNode
 
     const result = await fn({
       currentDom: dom,
-      svgNode: svg,
-      d3Selection: d3SelectedSvg,
+      svgNode: svgToOperate,
+      d3Selection: body.select("svg"),
     });
 
-    if (renderOptions.asBase64) {
-      if (isString(result)) return toSvgBase64(result);
-      return toSvgBase64(svg.outerHTML);
-    }
-
-    return isString(result) ? result : svg.outerHTML;
+    const renderedHtmlString = clone(isString(result) ? result : svgToOperate.outerHTML)
+    dom.window.document.body.removeChild(svgNode)
+    return renderOptions.asBase64 ? toSvgBase64(renderedHtmlString) : renderedHtmlString
   };
 
   return {
