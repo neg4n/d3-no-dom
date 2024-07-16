@@ -1,3 +1,16 @@
+# [2.1.0](https://github.com/neg4n/d3-no-dom/compare/v2.0.0...v2.1.0) (2024-07-16)
+
+
+### Bug Fixes
+
+* remove separate package for setting obj path ([5027640](https://github.com/neg4n/d3-no-dom/commit/50276408f11c6945dc60ede1481b9e713bdc37a3))
+* typings + move utils to separate file ([ce94fd8](https://github.com/neg4n/d3-no-dom/commit/ce94fd829f36e099711929c2ddbfb58aec6d9c25))
+
+
+### Features
+
+* make dom manipulation more direct ([f22d1ca](https://github.com/neg4n/d3-no-dom/commit/f22d1caab162ee7b4368bb5d0ca07e2219c6a9e7))
+
 # [2.0.0](https://github.com/neg4n/d3-no-dom/compare/v1.0.0...v2.0.0) (2024-07-01)
 
 
