@@ -3,15 +3,22 @@ import { safeHtml } from "common-tags";
 import { clone, isString, mergeDeep, set } from "remeda";
 import type { BaseType as D3BaseType } from "d3";
 
-type DomProvider<T> = new (html: string) => T;
-type InferDomType<T> = T extends DomProvider<infer U> ? U : never;
+import { toSvgBase64 } from "./utils.js";
+
+type WindowLike = {
+  document: Document & {
+    body: HTMLElement;
+  };
+} & Record<string, unknown>;
 
 type DomWithBody = {
-  window: Window
+  window: WindowLike;
 };
 
-type PrepareSvgServerSideRendererParams<T extends DomProvider<DomWithBody>> = {
-  domProvider: T;
+type DomProvider<T extends DomWithBody> = new (html: string) => T;
+
+type PrepareSvgServerSideRendererParams<T extends DomWithBody> = {
+  domProvider: DomProvider<T>;
   d3Instance: typeof import("d3");
 };
 
@@ -51,17 +58,15 @@ const DEFAULT_RENDER_OPTIONS: RequiredDeep<PrepareSvgServerSideRenderOptions> = 
   asBase64: false,
 };
 
-export function prepareSvgServerSideRenderer<T extends DomProvider<DomWithBody>>({
+export function prepareSvgServerSideRenderer<T extends DomWithBody>({
   d3Instance,
   domProvider,
 }: PrepareSvgServerSideRendererParams<T>) {
-  type DomType = InferDomType<T>;
-
-  const dom = new domProvider("<body></body>") as DomType;
+  const dom = new domProvider("<body></body>");
   const body = d3Instance.select(dom.window.document.body);
 
   const render = async (
-    fn: PrepareSvgServerSideRender<DomType>,
+    fn: PrepareSvgServerSideRender<T>,
     options: PrepareSvgServerSideRenderOptions = {},
   ) => {
     const renderOptions = mergeDeep(
@@ -108,9 +113,3 @@ export function prepareSvgServerSideRenderer<T extends DomProvider<DomWithBody>>
     render,
   };
 }
-
-export function toSvgBase64(string: string) {
-  const base64String = btoa(string);
-  return `data:image/svg+xml;base64,${base64String}`;
-}
-
